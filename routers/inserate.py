@@ -9,7 +9,7 @@ router = APIRouter()
 @router.get("/inserate")
 async def get_inserate(
     query: str = Query(None),
-    location: str = Query(None),
+    plz: str = Query(None, description="Postleitzahl wie '10115'"),
     radius: int = Query(None),
     min_price: int = Query(None),
     max_price: int = Query(None),
