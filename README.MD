@@ -64,15 +64,18 @@ The API will be available at `http://localhost:8000`
 
 ##### Query Parameters:
 - **`query`** *(string, optional)*: The search term (e.g., "fahrrad" to search for bicycles).
-- **`location`** *(string, optional)*: The location or postal code to narrow the search (e.g., `10178` for Berlin).
+- **`plz`** *(string, required)*: The postal code to narrow the search (e.g., 10178 for Berlin).
 - **`radius`** *(integer, optional)*: The search radius in kilometers from the specified location (e.g., `5` for a 5 km radius).
 - **`min_price`** *(integer, optional)*: The minimum price in Euros for the listings (e.g., `200` for at least 200 Euros).
 - **`max_price`** *(integer, optional)*: The maximum price in Euros for the listings (e.g., `500` for at most 500 Euros).
 - **`page_count`** *(integer, optional)*: The number of pages to search or return (e.g., `5` for the first 5 pages, default is 1, max: 20 pages).
+- **`category_id`** *(string, optional)*: Category identifier (e.g., c161).
+- **`location_id`** *(string, optional)*: Location identifier (e.g., l3843).
+- **`sort`** *(string, optional)*: Sorting method (e.g., preis to sort by price low to high).
 
 ##### Example Request:
 ```http
-GET /inserate?query=fahrrad&location=10178&radius=5&min_price=200&page_count=5
+GET /inserate?query=fahrrad&plz=10178&radius=5&min_price=200&max_price=500&page_count=3&sort=preis&category_id=c161&location_id=l3843
 ```
 
 #### 2. Fetch Listing Details
