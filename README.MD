@@ -38,7 +38,7 @@ Visit [kleinanzeigen-agent.de](https://kleinanzeigen-agent.de/features/developer
 
 1. Clone the repository
 ```sh
-git clone https://github.com/DanielWTE/ebay-kleinanzeigen-api.git
+git clone https://github.com/Mio-ctrl/ebay-kleinanzeigen-api.git
 cd ebay-kleinanzeigen-api
 ```
 
