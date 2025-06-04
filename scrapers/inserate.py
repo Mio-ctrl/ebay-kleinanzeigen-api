@@ -1,59 +1,56 @@
 from urllib.parse import urlencode
-
 from fastapi import HTTPException
-
 from utils.browser import PlaywrightManager
 
+def build_kleinanzeigen_url(category_id, location_id, plz, radius, sort=None, category_slug="multimedia-elektronik"):
+    if not all([category_id, location_id, plz, radius]):
+        return None
 
-async def get_inserate_klaz(browser_manager: PlaywrightManager,
-                            query: str = None,
-                            location: str = None,
-                            radius: int = None,
-                            min_price: int = None,
-                            max_price: int = None,
-                            page_count: int = 1):
-    base_url = "https://www.ebay-kleinanzeigen.de"
+    url = f"https://www.kleinanzeigen.de/s-{category_slug}/{plz}/"
+    if sort == "preis":
+        url += "sortierung:preis/"
+    url += f"{category_id}{location_id}r{radius}"
+    return url
 
-    # Build the price filter part of the path
-    price_path = ""
-    if min_price is not None or max_price is not None:
-        # Convert prices to strings; if one is None, leave its place empty
-        min_price_str = str(min_price) if min_price is not None else ""
-        max_price_str = str(max_price) if max_price is not None else ""
-        price_path = f"/preis:{min_price_str}:{max_price_str}"
 
-    # Build the search path with price and page information
-    search_path = f"{price_path}/s-seite"
-    search_path += ":{page}"
+async def get_inserate_klaz(
+    browser_manager,
+    query,
+    plz,
+    radius,
+    min_price,
+    max_price,
+    page_count,
+    category_id=None,
+    location_id=None,
+    sort=None
+):
+    base_url = build_kleinanzeigen_url(category_id, location_id, plz, radius, sort)
 
-    # Build query parameters as before
+    if base_url is None:
+        raise HTTPException(status_code=400, detail="Ungültige URL-Parameter: category_id, location_id, plz oder radius fehlen.")
+
     params = {}
     if query:
         params['keywords'] = query
-    if location:
-        params['locationStr'] = location
-    if radius:
-        params['radius'] = radius
+    if min_price is not None:
+        params['price_from'] = min_price
+    if max_price is not None:
+        params['price_to'] = max_price
 
-    # Construct the full URL and get it
-    search_url = base_url + search_path + ("?" + urlencode(params) if params else "")
-
+    results = []
     page = await browser_manager.new_context_page()
     try:
-        await page.goto(search_url.format(page=1), timeout=120000)
-        results = []
+        for i in range(1, page_count + 1):
+            full_url = base_url + f"/s-seite:{i}"
+            if params:
+                full_url += "?" + urlencode(params)
 
-        for i in range(page_count):
+            await page.goto(full_url, timeout=120000)
+            await page.wait_for_load_state("networkidle")
+
             page_results = await get_ads(page)
             results.extend(page_results)
-
-            if i < page_count - 1:
-                try:
-                    await page.goto(search_url.format(page=i+2), timeout=120000)
-                    await page.wait_for_load_state("networkidle")
-                except Exception as e:
-                    print(f"Failed to load page {i + 2}: {str(e)}")
-                    break
         return results
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
