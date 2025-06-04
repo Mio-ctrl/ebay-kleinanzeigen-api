@@ -216,8 +216,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Server starten
-app.listen(PORT, () => {
+// Server starten - Railway benötigt 0.0.0.0 binding
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Server läuft auf Port ${PORT}`);
   console.log(`📍 Health Check: http://localhost:${PORT}/health`);
   console.log(`🔍 Beispiel Suche: http://localhost:${PORT}/search?q=laptop`);
